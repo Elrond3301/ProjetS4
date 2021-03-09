@@ -127,5 +127,37 @@ public class Block {
 				+ timeStamp + "\nhashCode : " + hashCode + "\npreviousHash : " + previousHash + "]\n\n";
 	}
 	
+	public boolean isHashCodeValid(int difficulty, Block block) {
+        for(int i = 0; i<difficulty;i++)
+             if (block.getHashCode()[i] != "0") {
+                 return false;
+            }
+        return true;
+}
+
+	public int mining() {
+		int nonce = 0;
+		while(!isHashCodeValid(difficulty, block)) {
+			nonce ++;
+			hash = Block.calculateHash(getHashCode());
+		}
+	}
+	
+	public float prime(int nbBlocks) { /* la prime décroit de moitié tout les N blocs */
+		float primebase = 50;
+		float prime = primebase;
+		int val = nbBlocks%10;
+		int i = 0;
+		if(val == 1) {
+			return primebase;
+		}
+		else {
+			while(i != val ) {
+				prime = prime + prime/2;
+				i++;
+			}
+			return prime;
+		}
+	
 	
 }
