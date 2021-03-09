@@ -26,14 +26,14 @@ public class Blockchain {
 		blocks = new Block[maxBlocks];
 		this.maxBlocks = maxBlocks;
 		this.difficulty = difficulty;
-		blocks[0] = new Block(0,new SimpleDateFormat("dd/MM/yyyy"),"Genesis","0");
+		blocks[0] = new Block(0,new SimpleDateFormat("dd/MM/yyyy"),"0");
 	}
 	
 	/** 
 	 * Méthode qui ajoute un nouveau Block à la blockchain et incrémente l'attribut nbBlocks
 	 */
 	public void addBlock() {
-		blocks[nbBlocks] = new Block(nbBlocks,new SimpleDateFormat("dd/MM/yyyy"),"0",blocks[nbBlocks-1].getHashCode());
+		blocks[nbBlocks] = new Block(nbBlocks,new SimpleDateFormat("dd/MM/yyyy"),blocks[nbBlocks-1].getHashCode());
 		nbBlocks ++;
 	}
 
@@ -80,4 +80,5 @@ public class Blockchain {
 			chaine = chaine + blocks[k].toString();
 		return chaine;
 	}
+		
 }
