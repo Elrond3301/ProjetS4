@@ -8,7 +8,7 @@ import java.text.DateFormat;
  * précédent et une nonce initialisé à0
  *
  * @author Simon Hautesserres
- * @date 02/03/2021
+ * @date 09/03/2021
  * @version 1.0
  */
 
@@ -27,22 +27,20 @@ public class Block {
 	 * @param transaction
 	 * @param previousHash
      */
-	public Block(int index, DateFormat timeStamp, String transaction, String previousHash) {
+	public Block(int index, DateFormat timeStamp, String previousHash) {
 		this.index = index;
 		this.timeStamp = timeStamp;
-		this.transaction = transaction;
 		this.previousHash = previousHash;
-		this.hashCode = calculateHash();
+	    calculateHash();
 	}
 	
 	/** 
 	 * Méthode qui appelle la méthode sha256, incrémente la nonce et retourne le hashCode
 	 * @return hashCode
 	 */
-	private String calculateHash() {
-		String hashCode = applySha256(this.index+this.timeStamp.toString()+this.transaction+this.previousHash+this.nonce);
+	private void calculateHash() {
+		this.hashCode = applySha256(this.index+this.timeStamp.toString()+this.transaction+this.previousHash+this.nonce);
 		nonce++;
-		return hashCode ;
 	}
 	
 	/** 
@@ -127,22 +125,25 @@ public class Block {
 				+ timeStamp + "\nhashCode : " + hashCode + "\npreviousHash : " + previousHash + "]\n\n";
 	}
 	
-	public boolean isHashCodeValid(int difficulty, Block block) {
+	public boolean isHashCodeValid(int difficulty) {
+		String zeros = "0000";
         for(int i = 0; i<difficulty;i++)
-             if (block.getHashCode()[i] != "0") {
+             if (!getHashCode().substring(0, difficulty).equals(zeros)) {
                  return false;
             }
         return true;
 }
 
-	public int mining() {
-		int nonce = 0;
-		while(!isHashCodeValid(difficulty, block)) {
-			nonce ++;
-			hash = Block.calculateHash(getHashCode());
-		}
-	}
+    public int mining(int difficulty){
+        while(!isHashCodeValid(difficulty)) {
+            calculateHash();
+        }
+        return nonce;
+    } 
 	
+	
+}
+
 	public float prime(int nbBlocks) { /* la prime décroit de moitié tout les N blocs */
 		float primebase = 50;
 		float prime = primebase;
