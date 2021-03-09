@@ -125,8 +125,13 @@ public class Block {
 				+ timeStamp + "\nhashCode : " + hashCode + "\npreviousHash : " + previousHash + "]\n\n";
 	}
 	
+	/**
+	 * Méthode qui vérifie si le hashCode respecte la difficulté qui correspond à difficulté * "0" au début du hash
+	 * @param difficulty
+	 * @return boolean
+	 */
 	public boolean isHashCodeValid(int difficulty) {
-		String zeros = "0000";
+		String zeros = zeros(difficulty);
         for(int i = 0; i<difficulty;i++)
              if (!getHashCode().substring(0, difficulty).equals(zeros)) {
                  return false;
@@ -134,17 +139,24 @@ public class Block {
         return true;
 }
 
+	/**
+	 * Méthode qui vérifie si le hashCode est valide et le recalcule tant que celui ci ne respecte pas la difficulté
+	 * @param difficulty
+	 * @return nonce
+	 */
     public int mining(int difficulty){
         while(!isHashCodeValid(difficulty)) {
             calculateHash();
         }
         return nonce;
     } 
-	
-	
-}
-
-	public float prime(int nbBlocks) { /* la prime décroit de moitié tout les N blocs */
+    
+    /**
+     * Méthode qui renvoie la prime qui décroit de moitié tous les N blocs
+     * @param nbBlocks
+     * @return prime
+     */
+    public float prime(int nbBlocks) { 
 		float primebase = 50;
 		float prime = primebase;
 		int val = nbBlocks%10;
@@ -159,6 +171,20 @@ public class Block {
 			}
 			return prime;
 		}
+    }
+    
+    /**
+     * Méthode qui concatènte des zéros "difficulty" fois dans un String
+     * @param difficulty
+     * @return zeros
+     */
+    public String zeros(int difficulty) {
+    	String zeros = "";
+    	for(int i = 0; i< difficulty; i++) {
+    		zeros+="0";
+    	}
+    	return zeros;
+    }
 	
 	
 }
