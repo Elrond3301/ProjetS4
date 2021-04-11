@@ -1,9 +1,8 @@
-package block;
-
-import java.text.SimpleDateFormat;
+package ProjetS4.src.block;
+import java.util.Date;
 
 /**
- * Classe Blockchain qui a pour attribut le nombre de blocks actuels, le maximum de blocks possibles, la difficulté de la blockchain et une 
+ * Classe Blockchain qui a pour attribut le nombre de blocks actuels, le maximum de blocks possibles, la difficulte de la blockchain et une 
  * liste de blocks
  *
  * @author Simon Hautesserres
@@ -15,25 +14,27 @@ public class Blockchain {
 	private int nbBlocks = 1;
 	private int maxBlocks;
 	private int difficulty;
+	private int maxTransactions;
 	private Block[] blocks;
 	
 	/** 
-	 * Constructeur qui crée la blockchain, met à jour l'attribut maxBlocks et diffculty et initialise le premier bloc Genesis 
+	 * Constructeur qui cree la blockchain, met a jour l'attribut maxBlocks et diffculty et initialise le premier bloc Genesis 
 	 * @param maxBlocks
 	 * @param difficulty
      */
-	public Blockchain(int maxBlocks, int difficulty) {
+	public Blockchain(int maxBlocks, int difficulty, int maxTransactions) {
 		blocks = new Block[maxBlocks];
 		this.maxBlocks = maxBlocks;
 		this.difficulty = difficulty;
-		blocks[0] = new Block(0,new SimpleDateFormat("dd/MM/yyyy"),"0");
+		this.maxTransactions = maxTransactions;
+		blocks[0] = new Block(0,new Date(),"0", difficulty, 1);
 	}
 	
 	/** 
-	 * Méthode qui ajoute un nouveau Block à la blockchain et incrémente l'attribut nbBlocks
+	 * Methode qui ajoute un nouveau Block dans la blockchain et incremente l'attribut nbBlocks
 	 */
 	public void addBlock() {
-		blocks[nbBlocks] = new Block(nbBlocks,new SimpleDateFormat("dd/MM/yyyy"),blocks[nbBlocks-1].getHashCode());
+		blocks[nbBlocks] = new Block(nbBlocks,new Date(),blocks[nbBlocks-1].getHashCode(), difficulty, 1);
 		nbBlocks ++;
 	}
 
@@ -54,15 +55,23 @@ public class Blockchain {
 	}
 	
 	/** 
-	 * Getter qui retourne la difficulté de calcul de la blockchain
+	 * Getter qui retourne la difficulte de calcul de la blockchain
 	 * @return difficulty
 	 */
 	public int getDifficulty() {
 		return difficulty;
 	}
+	
+	/** 
+	 * Getter qui retourne le nombre max de transactions
+	 * @return maxTransactions
+	 */
+	public int getMaxTransactions() {
+		return maxTransactions;
+	}
 
 	/** 
-	 * Getter qui retourne un block de la blockchain en fonction de l'index en paramètre
+	 * Getter qui retourne un block de la blockchain en fonction de l'index en parametre
 	 * @param index
 	 * @return transaction
 	 */
@@ -71,14 +80,16 @@ public class Blockchain {
 	}
 	
 	/** 
-	 * Méthode toString qui retourne une chaine concaténée de chaque info de chaque block de la blockchain
+	 * Methode toString qui retourne une chaine concatenee de chaque info de chaque block de la blockchain
 	 * @return chaine
 	 */
 	public String toString() {
-		String chaine = "";
-		for(int k = 0; k < maxBlocks; k++)
-			chaine = chaine + blocks[k].toString();
+		String chaine = "======== GENESIS ======== \n"+ blocks[0].toString()+"=== PHASE HELICOPTERE === \n";
+		for(int k = 1; k < maxBlocks; k++)
+			chaine = chaine + blocks[k].toString();/*On concatène tous les affichages des blocs dans une chaine*/
 		return chaine;
 	}
-		
+	
+	
+	
 }
