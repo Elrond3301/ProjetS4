@@ -1,7 +1,5 @@
 package ProjetS4.src.block;
 import java.util.Date;
-import java.util.ArrayList;
-
 /**
  * Classe Block qui a pour attribut un indice, une date, une liste de transactions, un hashCode, le hashcode du block 
  * precedent et une nonce initialise a 0
@@ -14,15 +12,11 @@ import java.util.ArrayList;
 public class Block {
 	private int index;
 	private int nonce = 0;
-	private ArrayList<String> transaction; /*A mettre dans Objet Transaction*/
-	private int maxTransactions;
-	private String hashTransaction= "";
+	private Transaction transaction;
 	private int difficulty;
-	/*Fin objet Transaction*/
 	private Date timeStamp;
 	private String hashCode;
-	private String previousHash = "0";
-	MerkleTree mkTree = new MerkleTree();
+	public String previousHash = "0";
 	
 	/** 
 	 * Constructeur qui met a jour la valeur de l'index, de la date, crée le merkle root des transaction  et du hash precedent
@@ -34,18 +28,19 @@ public class Block {
 	public Block(int index, Date timeStamp, String previousHash, int difficulty, int maxTransactions) {
 		this.index = index;
 		this.timeStamp = timeStamp;
-		this.transaction = new ArrayList<String>(maxTransactions);
-		this.maxTransactions = maxTransactions;
 		this.difficulty = difficulty;
-		calculateHash(); /*On calcule une premiere fois le Hash*/
+		
+		
 		/* Si le block n'est pas le premier cree*/
 		if(index!=0) {
+			this.transaction = new Transaction("Machin reçoit 50 bonobos.",maxTransactions);
+			calculateHash(); /*On calcule une premiere fois le Hash*/
 			mining(difficulty); /*On mine en fonction de la difficulté le bloc*/
 			this.previousHash = previousHash; /*On actualise le hash du bloc précédent*/
 		}
 		else {
-			transaction.add("Genesis"); /*Le bloc contient uniquement la transaction "Genesis"*/
-			hashTransaction = mkTree.createMerkleTree(transaction);
+			this.transaction = new Transaction("Genesis",maxTransactions);
+			calculateHash(); /*On calcule une premiere fois le Hash*/
 			nonce--; /*Il a une nonce nulle*/
 		}
 	    
@@ -57,7 +52,7 @@ public class Block {
 	 */
 	private void calculateHash() {
 		HashUtil hash = new HashUtil(); /*On crée un hash pour ensuite le calculer et l'actualiser dans hashCode*/
-		this.hashCode = hash.applySha256(this.index+this.timeStamp.toString()+this.hashTransaction+this.previousHash+this.nonce);
+		this.hashCode = hash.applySha256(this.index+this.timeStamp.toString()+this.transaction.getHashTransactions()+this.previousHash+this.nonce);
 		this.nonce++;
 	}
 	
@@ -83,8 +78,8 @@ public class Block {
 	 * @param index
 	 * @return transaction
 	 */
-	public String getTransaction(int index) {
-		return transaction.get(index);
+	public Transaction getTransaction() {
+		return transaction;
 	}
 	
 	/** 
@@ -104,14 +99,6 @@ public class Block {
 	}
 	
 	/** 
-	 * Getter qui retourne le hash code des transactions calcules avec le merkle tree
-	 * @return hashTransaction
-	 */
-	public String getHashTransaction() {
-		return this.hashTransaction;
-	}
-	
-	/** 
 	 * Getter qui retourne le hash du bloc precedent
 	 * @return previousHash
 	 */
@@ -120,11 +107,19 @@ public class Block {
 	}
 	
 	/** 
+	 * Getter qui retourne le hash du bloc precedent
+	 * @return previousHash
+	 */
+	public int getDifficulty() {
+		return difficulty;
+	}
+	
+	/** 
 	 * Methode toString qui retourne une chaine concatenee des attributs du block
 	 * @return chaine
 	 */
 	public String toString() {
-		return "Block Mined !! : "+getHashCode()+" n° : "+getIndex()+" Nonce = "+getNonce()+" Previous Hash: "+getPreviousHash()+" Transaction: "+getHashTransaction()+"\n";
+		return "Block Mined !! : "+getHashCode()+" n° : "+getIndex()+" Nonce = "+getNonce()+" Previous Hash: "+getPreviousHash()+" Transaction: "+transaction.getHashTransactions()+"\n";
 	}
 	
 	/**
@@ -132,30 +127,44 @@ public class Block {
 	 * @param difficulty
 	 * @return boolean
 	 */
-	public boolean isHashCodeValid(int difficulty) {
+	private boolean isHashCodeValid(int difficulty) {
 		String zeros = zeros(difficulty); /*On initialise avec un nombre definis de zeros par difficulte*/
         if (!getHashCode().substring(0, difficulty).equals(zeros)) { /*Si le début du hash code n'a pas le bon nombre de zeros, on retourne false*/
                  return false;
         }
         return true;
-}
+	}
+	
+	/**
+	 * Methode qui verifie si le block est valide et mine le hashCode si nécessaire
+	 * @return boolean
+	 */
+	public boolean isBlockValid(){
+		if (index == 0) return true;
+		HashUtil hash = new HashUtil();
+		boolean etat = hash.applySha256(this.index+this.timeStamp.toString()+this.transaction.getHashTransactions()+this.previousHash+this.nonce).equals(hashCode);
+		calculateHash(); /*On recalcule le hash une première fois*/
+		mining(difficulty); /*On le mine jusqu'à ce qu'il soit valide*/
+		return etat;
+	}
 
 	/**
 	 * Methode qui verifie si le hashCode est valide et le recalcule tant que celui ci ne respecte pas la difficulte
 	 * @param difficulty
 	 */
-    public void mining(int difficulty){
+    private void mining(int difficulty){
         while(!isHashCodeValid(difficulty)) {
             calculateHash();
         }
     } 
+    
     
     /**
      * Methode qui concatente des zeros "difficulty" fois dans un String
      * @param difficulty
      * @return zeros
      */
-    public String zeros(int difficulty) {
+    private String zeros(int difficulty) {
     	String zeros = "";
     	for(int i = 0; i< difficulty; i++) {
     		zeros+="0";
@@ -188,12 +197,4 @@ public class Block {
 		}
     }
     
-    public void addTransaction(String trans) {
-    	if(transaction.size() == maxTransactions)
-    		return;
-    	transaction.add(trans);
-    	hashTransaction = mkTree.createMerkleTree(transaction);
-    	calculateHash();
-    	mining(difficulty);
-    }
 }
