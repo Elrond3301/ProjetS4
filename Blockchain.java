@@ -1,6 +1,5 @@
 package ProjetS4.src.block;
 import java.util.Date;
-
 /**
  * Classe Blockchain qui a pour attribut le nombre de blocks actuels, le maximum de blocks possibles, la difficulte de la blockchain et une 
  * liste de blocks
@@ -34,8 +33,13 @@ public class Blockchain {
 	 * Methode qui ajoute un nouveau Block dans la blockchain et incremente l'attribut nbBlocks
 	 */
 	public void addBlock() {
-		blocks[nbBlocks] = new Block(nbBlocks,new Date(),blocks[nbBlocks-1].getHashCode(), difficulty, 1);
-		nbBlocks ++;
+		if(nbBlocks != maxBlocks ) {
+			blocks[nbBlocks] = new Block(nbBlocks,new Date(),blocks[nbBlocks-1].getHashCode(), difficulty, maxTransactions);
+			nbBlocks ++;
+		}
+		else {
+			System.out.println("WARNING !! La blockchain est déjà rempli.");
+		}
 	}
 
 	/** 
@@ -90,6 +94,14 @@ public class Blockchain {
 		return chaine;
 	}
 	
+	/** 
+	 * Methode isBlockchainValid qui vérifie si chaque bloc de la blockchain sont valides
+	 */
+	public void isBlockchainValid() {
+		for(int k = 0; k < nbBlocks; k++){
+			if(!blocks[k].isBlockValid() && k+1<maxBlocks) blocks[k+1].previousHash=blocks[k].getHashCode();
+		}
+	}
 	
 	
 }
