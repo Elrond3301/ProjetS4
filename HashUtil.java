@@ -2,6 +2,13 @@ package ProjetS4.src.block;
 
 import java.security.MessageDigest;
 
+/**
+ * Classe HashUtil qui contient les fonctions utiles pour calculer le hashCode
+ *
+ * @author Simon Hautesserres
+ * @date 17/04/2021
+ * @version 1.0
+ */
 public class HashUtil {
  
 	//Applies Sha256 to a string and returns the result. 
