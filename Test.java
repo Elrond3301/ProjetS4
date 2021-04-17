@@ -10,13 +10,16 @@ public class Test {
 		int difficulty = input.inputInt();
 		System.out.println("-- Rentrez le nombre max de transactions --\nChoix: ");
 		int maxTransactions = input.inputInt();
+		
 		//On lance la creation d'une blockchain avec un nombre de blocs etablis
 		Blockchain blockchain = new Blockchain(nbBlocks, difficulty, maxTransactions);
 		for(int k = 1; k < nbBlocks; k++)
 			blockchain.addBlock();
 		System.out.println(blockchain);
-		/*On ajoute des transactions*/
-		blockchain.getBlocks(1).addTransaction("Astérix envoie 10 Bnb à Obélix.");
+		/*On ajoute un bloc et des transactions*/
+		blockchain.addBlock();
+		blockchain.getBlocks(1).getTransaction().addTransaction("Poukama a 10 bonobos");
+		blockchain.isBlockchainValid();
 		System.out.println(blockchain);
 		
 	}
