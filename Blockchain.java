@@ -1,5 +1,4 @@
 package ProjetS4.src.block;
-import java.util.Date;
 /**
  * Classe Blockchain qui a pour attribut le nombre de blocks actuels, le maximum de blocks possibles, la difficulte de la blockchain et une 
  * liste de blocks
@@ -26,7 +25,7 @@ public class Blockchain {
 		this.maxBlocks = maxBlocks;
 		this.difficulty = difficulty;
 		this.maxTransactions = maxTransactions;
-		blocks[0] = new Block(0,new Date(),"0", difficulty, 1);
+		blocks[0] = new Block(0,"0", difficulty, 1);
 	}
 	
 	/** 
@@ -34,7 +33,7 @@ public class Blockchain {
 	 */
 	public void addBlock() {
 		if(nbBlocks != maxBlocks ) {
-			blocks[nbBlocks] = new Block(nbBlocks,new Date(),blocks[nbBlocks-1].getHashCode(), difficulty, maxTransactions);
+			blocks[nbBlocks] = new Block(nbBlocks,blocks[nbBlocks-1].getHashCode(), difficulty, maxTransactions);
 			nbBlocks ++;
 		}
 		else {
@@ -84,22 +83,11 @@ public class Blockchain {
 	}
 	
 	/** 
-	 * Methode toString qui retourne une chaine concatenee de chaque info de chaque block de la blockchain
-	 * @return chaine
-	 */
-	public String toString() {
-		String chaine = "======== GENESIS ======== \n"+ blocks[0].toString()+"=== PHASE HELICOPTERE === \n";
-		for(int k = 1; k < maxBlocks; k++)
-			chaine = chaine + blocks[k].toString();/*On concatène tous les affichages des blocs dans une chaine*/
-		return chaine;
-	}
-	
-	/** 
 	 * Methode isBlockchainValid qui vérifie si chaque bloc de la blockchain sont valides
 	 */
 	public void isBlockchainValid() {
 		for(int k = 0; k < nbBlocks; k++){
-			if(!blocks[k].isBlockValid() && k+1<maxBlocks) blocks[k+1].previousHash=blocks[k].getHashCode();
+			if(!blocks[k].isBlockValid() && k+1<maxBlocks) blocks[k+1].setPreviousHash(blocks[k].getHashCode());
 		}
 	}
 	
