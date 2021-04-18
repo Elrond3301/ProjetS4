@@ -18,7 +18,7 @@ public class Test {
 		System.out.println(blockchain);
 		/*On ajoute un bloc et des transactions*/
 		blockchain.addBlock();
-		blockchain.getBlocks(1).getTransaction().addTransaction("Poukama a 10 bonobos");
+		blockchain.getBlocks(1).getTransaction().addTransaction("Michel a 10 bonobos");
 		blockchain.isBlockchainValid();
 		System.out.println(blockchain);
 		
