@@ -1,6 +1,7 @@
 package ProjetS4.src.block;
 
 import java.util.ArrayList;
+import java.sql.Timestamp;
 
 /**
  * Classe Transaction qui contient l'ensemble des paramètres de transactions d'un bloc
@@ -10,11 +11,12 @@ import java.util.ArrayList;
  * @version 1.0
  */
 public class Transaction {
+	private Timestamp timestamp;
 	private ArrayList<String> transaction;
 	private int nbTransactions = 1;
 	private int maxTransactions;
 	private String hashTransaction= "";
-	MerkleTree mkTree = new MerkleTree();
+	private MerkleTree mkTree = new MerkleTree();
 	
 	
 	/** 
@@ -24,10 +26,19 @@ public class Transaction {
 	 * @param maxTransactions
      */
 	public Transaction(String firstTransaction, int maxTransactions) {
+		this.timestamp = new Timestamp(System.currentTimeMillis());
 		this.maxTransactions = maxTransactions;
 		this.transaction = new ArrayList<String>(maxTransactions);
 		transaction.add(firstTransaction);
 		calculateHashTransaction();
+	}
+	
+	/** 
+	 * Getter qui retourne le timestamp de la transaction
+	 * @return timestamp
+	 */
+	public Timestamp getTimestamp() {
+		return timestamp;
 	}
 	
 	/** 
