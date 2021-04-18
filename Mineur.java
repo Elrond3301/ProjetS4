@@ -9,13 +9,15 @@ package ProjetS4.src.block;
  */
 
 public class Mineur {
+	private int index;
 	private int argent;
 	
 	/** 
 	 * Constructeur qui met a jour l'attribut argent
 	 * @param argent
      */
-	public Mineur(int argent) {
+	public Mineur(int index, int argent) {
+		this.index = index;
 		this.argent = argent;
 	}
 	
@@ -25,6 +27,14 @@ public class Mineur {
 	 */
 	public int getArgent() {
 		return argent;
+	}
+	
+	/** 
+	 * Getter qui renvoie l'attribut index du mineur
+	 * @return index
+	 */
+	public int getIndex() {
+		return index;
 	}
 	
 	/** 
