@@ -1,11 +1,11 @@
 package ProjetS4.src.block;
-import java.util.Date;
+import java.sql.Timestamp;
 /**
- * Classe Block qui a pour attribut un indice, une date, une liste de transactions, un hashCode, le hashcode du block 
+ * Classe Block qui a pour attribut un indice, une date, un objet transactions et un mineur associé, la difficulté du bloc,  un hashCode, le hashcode du block 
  * precedent et une nonce initialise a 0
  *
  * @author Simon Hautesserres
- * @date 11/04/2021
+ * @date 18/04/2021
  * @version 1.0
  */
 
@@ -14,9 +14,11 @@ public class Block {
 	private int nonce = 0;
 	private Transaction transaction;
 	private int difficulty;
-	private Date timeStamp;
+	private Timestamp timeStamp;
 	private String hashCode;
-	public String previousHash = "0";
+	private String previousHash = "0";
+	private Mineur user;
+	
 	
 	/** 
 	 * Constructeur qui met a jour la valeur de l'index, de la date, crée le merkle root des transaction  et du hash precedent
@@ -25,15 +27,15 @@ public class Block {
 	 * @param transaction
 	 * @param previousHash
      */
-	public Block(int index, Date timeStamp, String previousHash, int difficulty, int maxTransactions) {
+	public Block(int index, String previousHash, int difficulty, int maxTransactions) {
 		this.index = index;
-		this.timeStamp = timeStamp;
+		this.timeStamp = new Timestamp(System.currentTimeMillis());
 		this.difficulty = difficulty;
-		
+		this.user = new Mineur(index,50);
 		
 		/* Si le block n'est pas le premier cree*/
 		if(index!=0) {
-			this.transaction = new Transaction("Machin reçoit 50 bonobos.",maxTransactions);
+			this.transaction = new Transaction("User "+index+" reçoit 50 bonobos.",maxTransactions);
 			calculateHash(); /*On calcule une premiere fois le Hash*/
 			mining(difficulty); /*On mine en fonction de la difficulté le bloc*/
 			this.previousHash = previousHash; /*On actualise le hash du bloc précédent*/
@@ -86,7 +88,7 @@ public class Block {
 	 * Getter qui retourne la date de creation du block
 	 * @return timeStamp
 	 */
-	public Date getTimeStamp() {
+	public Timestamp getTimeStamp() {
 		return timeStamp;
 	}
 	
@@ -107,6 +109,14 @@ public class Block {
 	}
 	
 	/** 
+	 * Setter qui modifie le hash du bloc précédent
+	 * @param previous
+	 */
+	public void setPreviousHash(String previous) {
+		previousHash = previous;
+	}
+	
+	/** 
 	 * Getter qui retourne le hash du bloc precedent
 	 * @return previousHash
 	 */
@@ -114,12 +124,16 @@ public class Block {
 		return difficulty;
 	}
 	
+	public Mineur getMineur() {
+		return user;
+	}
+	
 	/** 
 	 * Methode toString qui retourne une chaine concatenee des attributs du block
 	 * @return chaine
 	 */
 	public String toString() {
-		return "Block Mined !! : "+getHashCode()+" n° : "+getIndex()+" Nonce = "+getNonce()+" Previous Hash: "+getPreviousHash()+" Transaction: "+transaction.getHashTransactions()+"\n";
+		return "Block Mined !! : "+getHashCode()+" n° : "+getIndex()+" Nonce = "+getNonce()+" Previous Hash: "+getPreviousHash()+" Transaction: "+transaction.getHashTransactions();
 	}
 	
 	/**
