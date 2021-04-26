@@ -10,10 +10,14 @@
 #ifndef __Blockchain_H__
 #define __Blockchain_H__
 
-#include <stdbool.h>
 
-typedef struct s_Blockchain Blockchain;
+#include <stdbool.h>
+#include "sha256.h"
+#include "sha256_utils.h"
+
 typedef struct s_Block Block;
+typedef struct s_Blockchain Blockchain;
+
 
 /*-----------------------------------------------------------------*/
 
@@ -53,14 +57,14 @@ Blockchain *blockchain_create(int nbBlocksMax, int difficulty, int maxTranssacti
  @note This function acts by side effect on the parameter l. The returned value is the same as the parameter l that is modified by the function.
 
  */
-Blockchain *blockchain_push_back(Blockchain *l, int v);
+Blockchain *blockchain_push_back(Blockchain *bc, int v);
 
 /** Destructor.
 	Added by the implementation. Free ressources allocated by constructors.
  	@param l the adress of the Blockchain.
  	After calling this function, the Blockchain l becomes NULL.
  */
-//void Blockchain_delete(ptrBlockchain *l);
+void blockchain_delete(Blockchain *bc);
 /** @} */
 
 /*-----------------------------------------------------------------*/
@@ -178,7 +182,14 @@ Blockchain *blockchain_reduce(Blockchain *l, ReduceFunctor f, void *userData);
  */
 Blockchain *blockchain_sort(Blockchain *l, OrderFunctor f);
 
+/*-----------------------------------------------------------------*/
+void mining(int difficulty , Block *block);
 
+/*-----------------------------------------------------------------*/
+float prime(int nbBlocks);
+
+/*-----------------------------------------------------------------*/
+int isHashCodeValid(int difficulty, Block *block);
 
 
 /** @} */

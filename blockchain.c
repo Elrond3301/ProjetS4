@@ -3,14 +3,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <string.h>	
+#include <time.h>
+#include <unistd.h>
 #include "blockchain.h"
+
+#define STRLONG 60
+#define BUFFERSIZE 32
 
 struct s_Block{
 	int index;
 	int nonce;
 	char * hashCode;
 	char * previousHash;
+	time_t timestamp;
 	struct s_Block *previous;
 	struct s_Block *next;
 };
@@ -19,7 +25,7 @@ struct s_Block{
  The sentinel is a Block * whose next pointer refer always to the head of the Blockchain and previous pointer to the tail of the Blockchain
  */
 struct s_Blockchain {
-	struct s_Block *sentinel;
+	Block *sentinel;
 	int nbBlocksMax;
 	int difficulty;
 	int maxTransactions;
@@ -39,77 +45,75 @@ Blockchain *blockchain_create(int nbBlocksMax, int difficulty, int maxTransactio
 }
 
 /*-----------------------------------------------------------------*/
-
-Blockchain *blockchain_push_back(Blockchain *l, int v) {
-	Block *e = malloc(sizeof(struct s_Block));
-	e->index = v;
-	e->nonce = 0;
-	e->previousHash = "0";
-	e->next = l->sentinel;
-	e->previous = e->next->previous;
-	e->previous->next = e;
-	e->next->previous = e;
-	++(l->nbBlocksMax);
-	return l;
+Blockchain *blockchain_push_back(Blockchain *bc, int v) {
+	Block *b = malloc(sizeof(struct s_Block));
+	b->index = v;
+	b->nonce = 1;
+	b->hashCode = malloc(2*BUFFERSIZE+1); /*On alloue la mémoire pour le hash Code et celui de son prédecesseur*/
+	b->previousHash =  malloc(2*BUFFERSIZE+1);
+	b->timestamp = time(NULL); 
+	b->next = bc->sentinel;
+	b->previous = b->next->previous;
+	b->previous->next = b;	
+	b->next->previous = b;
+	if(v == 0) b->previousHash = "0"; /*Le bloc génésis a la chaine "0" comme previousHash*/
+	else b->previousHash = b->previous->hashCode; /*Sinon on prend le hash Code du prédecesseur*/
+	char  buffer1[100], buffer2[100]; 
+	sprintf(buffer1, "%d", b->index); sprintf(buffer2, "%d", b->nonce);	
+	strcat(buffer1,strcat(buffer2,strcat(ctime(&b->timestamp),b->previousHash)));
+	sha256ofString((BYTE *)buffer1,b->hashCode);
+	++(bc->nbBlocksMax);
+	mining(bc->difficulty,b);
+	sleep(0.5);
+	printf("Block Mined!! Numéro = %d Nonce = %d HashCode = %s PreviousHash = %s\n",b->index,b->nonce, b->hashCode, b->previousHash);
+	return bc;
 }
 
 /*-----------------------------------------------------------------*/
 
-/*void Blockchain_delete(ptrBlockchain *l) {
-    	*l=NULL;
-}*/
+void blockchain_delete(Blockchain *bc) {
+		free(bc);
+}
+
 
 /*-----------------------------------------------------------------*/
 
-Blockchain *blockchain_push_front(Blockchain *l, int v) {
-	Block *e = malloc(sizeof(struct s_Block));
-	e->index = v;
-	e->previous = l->sentinel;
-	e->next = e->previous->next;
-	e->previous->next = e;
-	e->next->previous = e;
-	++(l->nbBlocksMax);
-	return l;
+int blockchain_front(Blockchain *bc) {
+	assert(!Blockchain_is_Empty(bc));
+	return bc->sentinel->next->index;
 }
 
 /*-----------------------------------------------------------------*/
 
-int blockchain_front(Blockchain *l) {
-	assert(!Blockchain_is_Empty(l));
-	return l->sentinel->next->index;
+int blockchain_back(Blockchain *bc) {
+	assert(!blockchain_is_Empty(bc));
+	return bc->sentinel->previous->index;
 }
 
 /*-----------------------------------------------------------------*/
 
-int blockchain_back(Blockchain *l) {
-	assert(!blockchain_is_Empty(l));
-	return l->sentinel->previous->index;
-}
-
-/*-----------------------------------------------------------------*/
-
-Blockchain *blockchain_pop_front(Blockchain *l) {
-	assert(!blockchain_is_empty(l));
+Blockchain *blockchain_pop_front(Blockchain *bc) {
+	assert(!blockchain_is_empty(bc));
 	Block *e;
-	e = l->sentinel->next;
-	l->sentinel->next = e->next;
-	l->sentinel->next->previous = l->sentinel;
-	--(l->nbBlocksMax);
+	e = bc->sentinel->next;
+	bc->sentinel->next = e->next;
+	bc->sentinel->next->previous = bc->sentinel;
+	--(bc->nbBlocksMax);
 	free(e);
-	return l;
+	return bc;
 }
 
 /*-----------------------------------------------------------------*/
 
-Blockchain *blockchain_pop_back(Blockchain *l){
-	assert(!blockchain_is_empty(l));
+Blockchain *blockchain_pop_back(Blockchain *bc){
+	assert(!blockchain_is_empty(bc));
 	Block *e;
-	e = l->sentinel->previous;
-	l->sentinel->previous = e->previous;
-	l->sentinel->previous->next = l->sentinel;
-	--(l->nbBlocksMax);
+	e = bc->sentinel->previous;
+	bc->sentinel->previous = e->previous;
+	bc->sentinel->previous->next = bc->sentinel;
+	--(bc->nbBlocksMax);
 	free(e);
-	return l;
+	return bc;
 }
 
 /*-----------------------------------------------------------------*/
@@ -136,6 +140,7 @@ Blockchain *blockchain_remove_at(Blockchain *l, int p) {
 	while (p--) remove = remove->next;
 	remove->previous->next = remove->next;
 	remove->next->previous = remove->previous;
+	free(remove->hashCode);
 	free(remove);
 	--(l->nbBlocksMax);
 	return l;
@@ -177,5 +182,46 @@ Blockchain *blockchain_reduce(Blockchain *l, ReduceFunctor f, void *userData) {
 	for(Block *e = l->sentinel->next; e != l->sentinel; e = e->next)
 		f(e->index, userData);
 	return l;
+}
+
+/*-----------------------------------------------------------------*/
+void mining(int difficulty , Block *b) {
+	char  buffer1[100], buffer2[100]; 
+	
+    while(!isHashCodeValid(difficulty, b)) {
+		b->nonce ++;
+		sprintf(buffer1, "%d", b->index); sprintf(buffer2, "%d", b->nonce);	
+		strcat(buffer1,strcat(buffer2,strcat(ctime(&b->timestamp),b->previousHash)));
+        sha256ofString((BYTE *)buffer1, b->hashCode);
+    }
+}
+
+/*-----------------------------------------------------------------*/
+float prime(int nbBlocks) { 
+    /* la prime décroit de moitié tout les N blocs */
+    float primebase = 50;
+    float prime = primebase;
+    int val = nbBlocks%10;
+    int i = 0;
+    if(val == 1) {
+        return primebase;
+    }
+    else {
+        while(i != val ) {
+            prime = prime + prime/2;
+            i++;
+        }
+        return prime;
+    }
+}
+
+/*-----------------------------------------------------------------*/
+int isHashCodeValid(int difficulty, Block *block) {
+    for(int i = 0; i<difficulty;i++){
+        if(block->hashCode[i] != '0') {
+            return 0;
+        }
+    }
+    return 1;
 }
 
