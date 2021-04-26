@@ -17,8 +17,6 @@ public class Block {
 	private Timestamp timeStamp;
 	private String hashCode;
 	private String previousHash = "0";
-	private Mineur user;
-	
 	
 	/** 
 	 * Constructeur qui met a jour la valeur de l'index, de la date, crée le merkle root des transaction  et du hash precedent
@@ -27,15 +25,13 @@ public class Block {
 	 * @param transaction
 	 * @param previousHash
      */
-	public Block(int index, String previousHash, int difficulty, int maxTransactions) {
+	public Block(int index, String previousHash, int difficulty, int maxTransactions, String transaction) {
 		this.index = index;
 		this.timeStamp = new Timestamp(System.currentTimeMillis());
 		this.difficulty = difficulty;
-		this.user = new Mineur(index,50);
-		
 		/* Si le block n'est pas le premier cree*/
 		if(index!=0) {
-			this.transaction = new Transaction("User "+index+" reçoit 50 bonobos.",maxTransactions);
+			this.transaction = new Transaction(transaction, maxTransactions);
 			calculateHash(); /*On calcule une premiere fois le Hash*/
 			mining(difficulty); /*On mine en fonction de la difficulté le bloc*/
 			this.previousHash = previousHash; /*On actualise le hash du bloc précédent*/
@@ -124,9 +120,6 @@ public class Block {
 		return difficulty;
 	}
 	
-	public Mineur getMineur() {
-		return user;
-	}
 	
 	/** 
 	 * Methode toString qui retourne une chaine concatenee des attributs du block
