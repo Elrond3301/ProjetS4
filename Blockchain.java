@@ -25,15 +25,15 @@ public class Blockchain {
 		this.maxBlocks = maxBlocks;
 		this.difficulty = difficulty;
 		this.maxTransactions = maxTransactions;
-		blocks[0] = new Block(0,"0", difficulty, 1);
+		blocks[0] = new Block(0,"0", difficulty, 1, "Creator reçoit 5000000000 satoBnb ");
 	}
 	
 	/** 
 	 * Methode qui ajoute un nouveau Block dans la blockchain et incremente l'attribut nbBlocks
 	 */
-	public void addBlock() {
+	public void addBlock(String transaction) {
 		if(nbBlocks != maxBlocks ) {
-			blocks[nbBlocks] = new Block(nbBlocks,blocks[nbBlocks-1].getHashCode(), difficulty, maxTransactions);
+			blocks[nbBlocks] = new Block(nbBlocks,blocks[nbBlocks-1].getHashCode(), difficulty, maxTransactions, transaction);
 			nbBlocks ++;
 		}
 		else {
